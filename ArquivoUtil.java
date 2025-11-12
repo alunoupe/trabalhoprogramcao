@@ -1,11 +1,15 @@
 package trabalho;
 
-public class ArquivoUtil  {
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class ArquivoUtil {
 
     private static ArquivoUtil instancia;
+    private static final String CAMINHO = "cadastros.txt";
 
     private ArquivoUtil() {
-        // construtor privado evita múltiplas instâncias
     }
 
     public static ArquivoUtil getInstancia() {
@@ -16,6 +20,12 @@ public class ArquivoUtil  {
     }
 
     public void salvar(String conteudo) {
-        System.out.println("[Arquivo salvo] " + conteudo);
+        try (FileWriter fw = new FileWriter(CAMINHO, true);
+             PrintWriter pw = new PrintWriter(fw)) {
+            pw.println(conteudo);
+            System.out.println("[Arquivo salvo com sucesso] " + conteudo);
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar no arquivo: " + e.getMessage());
+        }
     }
 }
