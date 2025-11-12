@@ -16,9 +16,9 @@ public class Main {
         PessoaFactory agenteFactory = new AgenteDeSaudeFactory();
         PessoaFactory enfermeiroFactory = new EnfermeiroFactory();
 
+        List<Familia> familias = new ArrayList<>();
         List<AgenteDeSaude> agentes = new ArrayList<>();
         List<Enfermeiro> enfermeiros = new ArrayList<>();
-        Familia familia = null;
 
         boolean continuar = true;
 
@@ -27,12 +27,12 @@ public class Main {
             System.out.println("1. Cadastrar Família");
             System.out.println("2. Cadastrar Agente de Saúde");
             System.out.println("3. Cadastrar Enfermeiro");
-            System.out.println("4. Listar Moradores da Família");
+            System.out.println("4. Listar Famílias e seus Moradores");
             System.out.println("5. Listar Todos os Agentes de Saúde");
             System.out.println("6. Listar Todos os Enfermeiros");
-            System.out.println("7. Sair");
-            System.out.println("8. Editar cadastro (por CPF)");
-            System.out.println("9. Excluir cadastro (por CPF)");
+            System.out.println("7. Editar Família (adicionar moradores)");
+            System.out.println("8. Excluir Família");
+            System.out.println("9. Sair");
             System.out.print("Escolha: ");
             int opcao = sc.nextInt();
             sc.nextLine();
@@ -42,116 +42,99 @@ public class Main {
                     case 1 -> {
                         System.out.print("Nome da família: ");
                         String nome = sc.nextLine();
-                        System.out.print("CPF (11 dígitos): ");
+                        System.out.print("CPF da família (11 dígitos): ");
                         String cpf = sc.nextLine();
-                        familia = (Familia) familiaFactory.criarPessoa(nome, cpf);
+
+                        Familia familia = (Familia) familiaFactory.criarPessoa(nome, cpf);
+                        familias.add(familia);
                         arquivo.salvar("Família cadastrada: " + familia);
                     }
+
                     case 2 -> {
-                        if (familia == null) {
-                            System.out.println("Cadastre uma família antes!");
-                            break;
-                        }
                         System.out.print("Nome do agente: ");
                         String nome = sc.nextLine();
                         System.out.print("CPF (11 dígitos): ");
                         String cpf = sc.nextLine();
+
                         AgenteDeSaude agente = (AgenteDeSaude) agenteFactory.criarPessoa(nome, cpf);
                         agentes.add(agente);
-                        familia.adicionarMorador(agente);
                         arquivo.salvar("Agente de Saúde cadastrado: " + agente);
                     }
+
                     case 3 -> {
-                        if (familia == null) {
-                            System.out.println("Cadastre uma família antes!");
-                            break;
-                        }
                         System.out.print("Nome do enfermeiro: ");
                         String nome = sc.nextLine();
                         System.out.print("CPF (11 dígitos): ");
                         String cpf = sc.nextLine();
+
                         Enfermeiro enfermeiro = (Enfermeiro) enfermeiroFactory.criarPessoa(nome, cpf);
                         enfermeiros.add(enfermeiro);
-                        familia.adicionarMorador(enfermeiro);
                         arquivo.salvar("Enfermeiro cadastrado: " + enfermeiro);
                     }
+
                     case 4 -> {
-                        if (familia == null) {
-                            System.out.println("Nenhuma família cadastrada.");
-                        } else {
-                            familia.listarMoradores();
-                        }
+                        System.out.println("\n=== Famílias Cadastradas ===");
+                        if (familias.isEmpty()) System.out.println("Nenhuma família cadastrada.");
+                        else familias.forEach(Familia::listarMoradores);
                     }
+
                     case 5 -> {
                         System.out.println("\n=== Agentes de Saúde Cadastrados ===");
                         if (agentes.isEmpty()) System.out.println("Nenhum agente cadastrado.");
                         else agentes.forEach(System.out::println);
                     }
+
                     case 6 -> {
                         System.out.println("\n=== Enfermeiros Cadastrados ===");
                         if (enfermeiros.isEmpty()) System.out.println("Nenhum enfermeiro cadastrado.");
                         else enfermeiros.forEach(System.out::println);
                     }
+
                     case 7 -> {
+                        System.out.print("Digite o CPF da família que deseja editar: ");
+                        String cpf = sc.nextLine();
+
+                        Familia familia = familias.stream()
+                                .filter(f -> f.getCpf().equals(cpf))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (familia == null) {
+                            System.out.println("Família não encontrada!");
+                            break;
+                        }
+
+                        System.out.println("Deseja adicionar um novo morador? (s/n)");
+                        if (sc.nextLine().equalsIgnoreCase("s")) {
+                            System.out.print("Nome do morador: ");
+                            String nome = sc.nextLine();
+                            System.out.print("CPF do morador: ");
+                            String cpfMorador = sc.nextLine();
+
+                            Morador morador = new Morador(nome, cpfMorador);
+                            familia.adicionarMorador(morador);
+                            arquivo.salvar("Novo morador adicionado: " + morador + " à família " + familia.getNome());
+                        }
+                    }
+
+                    case 8 -> {
+                        System.out.print("Digite o CPF da família que deseja excluir: ");
+                        String cpf = sc.nextLine();
+                        boolean removido = familias.removeIf(f -> f.getCpf().equals(cpf));
+
+                        if (removido) {
+                            System.out.println("Família removida com sucesso!");
+                            arquivo.salvar("Família removida (CPF: " + cpf + ")");
+                        } else {
+                            System.out.println("Família não encontrada!");
+                        }
+                    }
+
+                    case 9 -> {
                         continuar = false;
                         System.out.println("Encerrando o sistema...");
                     }
-                    case 8 -> { // editar cadastro
-                        System.out.print("Digite o CPF do cadastro que deseja editar: ");
-                        String cpf = sc.nextLine();
 
-                        boolean encontrado = false;
-
-                        for (AgenteDeSaude a : agentes) {
-                            if (a.getCpf().equals(cpf)) {
-                                System.out.print("Novo nome: ");
-                                a.nome = sc.nextLine();
-                                System.out.println("Agente atualizado!");
-                                arquivo.salvar("Agente atualizado: " + a);
-                                encontrado = true;
-                            }
-                        }
-
-                        for (Enfermeiro e : enfermeiros) {
-                            if (e.getCpf().equals(cpf)) {
-                                System.out.print("Novo nome: ");
-                                e.nome = sc.nextLine();
-                                System.out.println("Enfermeiro atualizado!");
-                                arquivo.salvar("Enfermeiro atualizado: " + e);
-                                encontrado = true;
-                            }
-                        }
-
-                        if (familia != null && familia.getCpf().equals(cpf)) {
-                            System.out.print("Novo nome da família: ");
-                            familia.nome = sc.nextLine();
-                            System.out.println("Família atualizada!");
-                            arquivo.salvar("Família atualizada: " + familia);
-                            encontrado = true;
-                        }
-
-                        if (!encontrado)
-                            System.out.println("CPF não encontrado!");
-                    }
-                    case 9 -> { // excluir cadastro
-                        System.out.print("Digite o CPF do cadastro que deseja excluir: ");
-                        String cpf = sc.nextLine();
-
-                        boolean removido = agentes.removeIf(a -> a.getCpf().equals(cpf))
-                                || enfermeiros.removeIf(e -> e.getCpf().equals(cpf));
-
-                        if (familia != null && familia.getCpf().equals(cpf)) {
-                            familia = null;
-                            removido = true;
-                        }
-
-                        if (removido) {
-                            System.out.println("Cadastro removido com sucesso!");
-                            arquivo.salvar("Cadastro removido (CPF: " + cpf + ")");
-                        } else {
-                            System.out.println("CPF não encontrado!");
-                        }
-                    }
                     default -> System.out.println("Opção inválida!");
                 }
             } catch (IllegalArgumentException e) {
@@ -162,5 +145,10 @@ public class Main {
         sc.close();
     }
 }
+
+
+    }
+}
+
 
 
