@@ -32,13 +32,13 @@ package trabalho;
 	            }
 	        }
 
-	        // Solicita os dados comuns a todas as pessoas
+	        
 	        System.out.print("Digite o nome: ");
 	        String nome = sc.nextLine();
 	        System.out.print("Digite o CPF: ");
 	        String cpf = sc.nextLine();
 
-	        // Cria a pessoa com base na fábrica selecionada
+	        
 	        pessoa = factory.criarPessoa(nome, cpf);
 
 	        System.out.println("----------------------------------");
@@ -49,4 +49,5 @@ package trabalho;
 	        sc.close();
 	    }
 	}
+
 
