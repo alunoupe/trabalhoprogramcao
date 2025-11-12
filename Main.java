@@ -19,7 +19,7 @@ package trabalho;
 	        System.out.println("3 - Enfermeiro");
 	        System.out.print("Opção: ");
 	        int opcao = sc.nextInt();
-	        sc.nextLine(); // limpar o buffer
+	        sc.nextLine(); 
 
 	        // Criação da fábrica correta conforme a escolha do usuário
 	        switch (opcao) {
@@ -49,3 +49,4 @@ package trabalho;
 	        sc.close();
 	    }
 	}
+
